@@ -1,0 +1,816 @@
+<title>6-Week Bootcamp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: phone-first single column; sticky scoreboard header, three tabs (Log / Squad / Recap). */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --sunk:#E8ECF2; --ink:#121B33; --muted:#5A6479; --line:#D9DFE8;
+  --workout:#2A4FE0; --workout-soft:#E3E9FD; --meal:#D9550B; --meal-soft:#FCE9DD;
+  --done:#1C9050; --done-soft:#DDF3E6; --partial:#E7B53C; --partial-soft:#FBF0D3;
+  --on-accent:#FFFFFF; --shadow:0 1px 2px rgba(18,27,51,.06),0 4px 14px rgba(18,27,51,.05);
+  --display:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1220; --surface:#151C2E; --sunk:#1C2439; --ink:#E8EDF6; --muted:#97A3BA; --line:#273150;
+  --workout:#7690FF; --workout-soft:#1D2A55; --meal:#FF8D4F; --meal-soft:#3A2418;
+  --done:#3FCB80; --done-soft:#143423; --partial:#E8BC4E; --partial-soft:#3A3016;
+  --on-accent:#0D1220; --shadow:none; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0D1220; --surface:#151C2E; --sunk:#1C2439; --ink:#E8EDF6; --muted:#97A3BA; --line:#273150;
+  --workout:#7690FF; --workout-soft:#1D2A55; --meal:#FF8D4F; --meal-soft:#3A2418;
+  --done:#3FCB80; --done-soft:#143423; --partial:#E8BC4E; --partial-soft:#3A3016;
+  --on-accent:#0D1220; --shadow:none; color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:720px;margin:0 auto}
+h1,h2,h3{text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--workout);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Header scoreboard */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 0}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.dayline{font-family:var(--display);font-weight:900;font-size:44px;line-height:.9;letter-spacing:.01em;text-transform:uppercase}
+.dayline small{font-size:22px;color:var(--muted);font-weight:700}
+.meta{text-align:right;font-size:13px;color:var(--muted)}
+.meta b{display:block;color:var(--ink);font-size:15px}
+.bar{height:6px;border-radius:3px;background:var(--sunk);margin-top:10px;overflow:hidden;display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+.bar span{background:var(--line)}
+.bar span.full{background:var(--ink)}
+.bar span.part{background:linear-gradient(90deg,var(--ink) var(--p),var(--line) var(--p))}
+nav{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line)}
+nav a{flex:1;text-align:center;padding:10px 4px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;border-bottom:3px solid transparent;margin-bottom:-1px}
+nav a[aria-current="page"]{color:var(--ink);border-color:var(--ink)}
+
+main{display:grid;gap:16px;padding-top:16px}
+section[data-view]{display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{font-family:var(--display);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.02em}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:13px}
+.banner{border-radius:12px;padding:12px 14px;background:var(--sunk);font-size:14px}
+.banner b{display:block}
+
+/* Forms */
+label.lbl{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+textarea{resize:vertical;min-height:44px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stack{display:grid;gap:12px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.meal-card .seg button[aria-pressed="true"]{background:var(--meal);border-color:var(--meal);color:var(--on-accent)}
+.workout-card .seg button[aria-pressed="true"]{background:var(--workout);border-color:var(--workout);color:var(--on-accent)}
+.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;background:var(--ink);color:var(--bg)}
+.btn.meal{background:var(--meal);color:var(--on-accent)}
+.btn.workout{background:var(--workout);color:var(--on-accent)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.small{padding:7px 12px;font-size:13px}
+.mins{display:flex;gap:8px;align-items:center}
+.mins input{width:90px;text-align:center;font-size:20px;font-weight:700}
+.photo-pick{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.photo-pick input{position:absolute;opacity:0;width:1px;height:1px}
+.preview{display:flex;align-items:center;gap:10px}
+.preview img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+
+/* Today checklist */
+.checks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.check{border-radius:12px;padding:10px;background:var(--sunk);display:grid;gap:2px}
+.check .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.check .v{font-family:var(--display);font-weight:900;font-size:24px;line-height:1}
+.check.ok{background:var(--done-soft)}
+.check.ok .v{color:var(--done)}
+.daystate{font-weight:700}
+.daystate.done{color:var(--done)}
+
+/* Entries list */
+.entries{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.entry{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;background:var(--bg);min-width:0}
+.entry .tag{flex:none;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px}
+.tag.meal{background:var(--meal-soft);color:var(--meal)}
+.tag.workout{background:var(--workout-soft);color:var(--workout)}
+.entry .txt{flex:1;min-width:0;overflow-wrap:anywhere}
+.entry .txt small{display:block;color:var(--muted);font-size:12px}
+.entry img{width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:zoom-in;flex:none;background:var(--sunk)}
+.x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:6px}
+
+/* Squad */
+.standings{display:grid;gap:10px}
+.player{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px;border-radius:12px;background:var(--bg)}
+.rank{font-family:var(--display);font-weight:900;font-size:26px;width:26px;text-align:center;color:var(--muted)}
+.pname{font-weight:700;font-size:16px;display:flex;align-items:center;gap:6px;min-width:0}
+.pname span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.pstats{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:2px}
+.pstats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.today-chips{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.chip{font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;background:var(--sunk);color:var(--muted)}
+.chip.on.meal{background:var(--meal-soft);color:var(--meal)}
+.chip.on.workout{background:var(--workout-soft);color:var(--workout)}
+.chip.on.done{background:var(--done-soft);color:var(--done)}
+.grid42{display:grid;grid-template-columns:repeat(7,11px);grid-auto-rows:11px;gap:3px}
+.grid42 i{border-radius:3px;background:var(--sunk)}
+.grid42 i.partial{background:var(--partial)}
+.grid42 i.done{background:var(--done)}
+.grid42 i.future{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.grid42 i.today{outline:2px solid var(--ink);outline-offset:1px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.squadtotals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.tot{background:var(--sunk);border-radius:12px;padding:10px}
+.tot .v{font-family:var(--display);font-weight:900;font-size:28px;line-height:1}
+.tot .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+.feed{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.feed li{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);min-width:0}
+.feed li:first-child{border-top:0}
+.feed .who{font-weight:700}
+.feed .when{color:var(--muted);font-size:12px}
+.feed .body{flex:1;min-width:0;overflow-wrap:anywhere}
+.feed img{width:64px;height:64px;object-fit:cover;border-radius:8px;cursor:zoom-in;flex:none;background:var(--sunk)}
+
+/* Recap */
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:16px}
+.stepper .d{flex:1;text-align:center;font-weight:700}
+.recap-rows{display:grid;gap:8px}
+.rrow{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:10px;border-radius:10px;background:var(--bg)}
+.badge{font-family:var(--display);font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:4px 7px;align-self:start;background:var(--sunk);color:var(--muted)}
+.badge.done{background:var(--done-soft);color:var(--done)}
+.badge.partial{background:var(--partial-soft);color:var(--ink)}
+.rrow .lines{font-size:14px;min-width:0;overflow-wrap:anywhere}
+.rrow .lines div{color:var(--muted)}
+.rrow .lines div b{color:var(--ink);font-weight:600}
+pre.recap-text{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;margin:0;overflow-x:auto;user-select:all;font-family:ui-monospace,Menlo,monospace}
+
+.empty{color:var(--muted);text-align:center;padding:20px 8px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+.lightbox{position:fixed;inset:0;background:rgba(5,8,16,.85);display:grid;place-items:center;z-index:30;padding:24px;cursor:zoom-out}
+.lightbox img{max-height:85vh;border-radius:12px}
+
+@media (min-width:640px){
+  .dayline{font-size:56px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .btn,.seg button{transition:transform .08s}
+  .btn:active,.seg button:active{transform:scale(.97)}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="top">
+    <div>
+      <div class="eyebrow">6-Week Bootcamp</div>
+      <div class="dayline num" id="dayline">Day <small>of 42</small></div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </div>
+  <div class="bar" id="bar" aria-hidden="true"></div>
+  <nav>
+    <a href="#log" data-tab="log">Log</a>
+    <a href="#squad" data-tab="squad">Squad</a>
+    <a href="#recap" data-tab="recap">Recap</a>
+  </nav>
+</header>
+
+<main>
+  <div class="banner" id="statusBanner" hidden></div>
+
+  <!-- LOG -->
+  <section data-view="log">
+    <div class="card" id="joinCard" hidden>
+      <div class="card-head"><h2>Join the challenge</h2></div>
+      <form id="joinForm" class="stack">
+        <div>
+          <label class="lbl" for="joinName">Your name, as the group knows you</label>
+          <input type="text" id="joinName" maxlength="24" placeholder="e.g. Sid" required>
+        </div>
+        <div><button class="btn" type="submit">Join</button></div>
+      </form>
+    </div>
+
+    <div id="logArea" hidden>
+      <div class="card stack">
+        <div class="card-head" style="margin:0">
+          <h2 id="myDayTitle">Your day</h2>
+          <div class="row">
+            <label class="hint" for="logDate">Logging for</label>
+            <input type="date" id="logDate" style="width:auto;padding:6px 10px">
+          </div>
+        </div>
+        <div class="checks" id="checks"></div>
+        <div class="hint" id="dayRule">A day counts when lunch and dinner are logged and you hit 30 minutes of intentional movement.</div>
+      </div>
+
+      <div class="card stack meal-card">
+        <div class="card-head" style="margin:0"><h2>Log a meal</h2></div>
+        <div class="seg" id="mealType" role="group" aria-label="Meal">
+          <button type="button" data-v="breakfast">Breakfast</button>
+          <button type="button" data-v="lunch">Lunch</button>
+          <button type="button" data-v="dinner">Dinner</button>
+          <button type="button" data-v="snack">Snack</button>
+        </div>
+        <div>
+          <label class="lbl" for="mealText">What did you eat?</label>
+          <textarea id="mealText" rows="2" maxlength="240" placeholder="Grilled chicken, rice, broccoli"></textarea>
+        </div>
+        <div class="row" id="photoRow">
+          <label class="photo-pick" id="photoPick">
+            <input type="file" id="mealPhoto" accept="image/*">
+            Add a photo
+          </label>
+          <div class="preview" id="photoPreview" hidden>
+            <img id="photoThumb" alt="Selected meal photo">
+            <button type="button" class="x" id="photoClear" aria-label="Remove photo">×</button>
+          </div>
+        </div>
+        <div><button class="btn meal" id="mealSave" type="button">Save meal</button></div>
+      </div>
+
+      <div class="card stack workout-card">
+        <div class="card-head" style="margin:0"><h2>Log a workout</h2></div>
+        <div class="seg" id="workType" role="group" aria-label="Workout type">
+          <button type="button" data-v="Run">Run</button>
+          <button type="button" data-v="Lift">Lift</button>
+          <button type="button" data-v="Walk">Walk</button>
+          <button type="button" data-v="HIIT">HIIT</button>
+          <button type="button" data-v="Bike">Bike</button>
+          <button type="button" data-v="Yoga">Yoga</button>
+          <button type="button" data-v="Sport">Sport</button>
+          <button type="button" data-v="Swim">Swim</button>
+          <button type="button" data-v="Other">Other</button>
+        </div>
+        <div class="row" style="gap:12px">
+          <div>
+            <label class="lbl" for="workMin">Minutes</label>
+            <div class="mins"><input type="number" id="workMin" min="1" max="600" inputmode="numeric" value="30" class="num"></div>
+          </div>
+          <div class="seg" style="align-self:flex-end">
+            <button type="button" data-min="30">30</button>
+            <button type="button" data-min="45">45</button>
+            <button type="button" data-min="60">60</button>
+            <button type="button" data-min="90">90</button>
+          </div>
+        </div>
+        <div>
+          <label class="lbl" for="workNote">What did you do? (optional)</label>
+          <input type="text" id="workNote" maxlength="160" placeholder="Push day: bench 4×8, rows, dips">
+        </div>
+        <div><button class="btn workout" id="workSave" type="button">Save workout</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Logged</h2><button type="button" class="btn ghost small" id="renameBtn">Change my name</button></div>
+        <ul class="entries" id="myEntries"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SQUAD -->
+  <section data-view="squad" hidden>
+    <div class="card">
+      <div class="card-head"><h2>Standings</h2><span class="hint" id="standHint"></span></div>
+      <div class="squadtotals" id="squadTotals"></div>
+      <div class="standings" id="standings"></div>
+      <div class="legend">
+        <span><i style="background:var(--done)"></i>Full day</span>
+        <span><i style="background:var(--partial)"></i>Partial</span>
+        <span><i style="background:var(--sunk)"></i>Missed</span>
+        <span><i style="box-shadow:inset 0 0 0 1px var(--line)"></i>Still ahead</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Latest from the squad</h2></div>
+      <ul class="feed" id="feed"></ul>
+    </div>
+    <div class="card stack" id="ownerCard" hidden>
+      <div class="card-head" style="margin:0"><h2>Challenge setup</h2><span class="hint">Only you see this</span></div>
+      <div class="row">
+        <div style="flex:1;min-width:180px">
+          <label class="lbl" for="startDate">Day 1 of the challenge</label>
+          <input type="date" id="startDate">
+        </div>
+        <button type="button" class="btn" id="startSave" style="align-self:flex-end">Save</button>
+      </div>
+      <div class="hint">To add friends: open Share on this page and invite each person by email as an Editor. Editors can log their own days and upload meal photos. Don't turn on a public link, because people who join through one can only look.</div>
+    </div>
+  </section>
+
+  <!-- RECAP -->
+  <section data-view="recap" hidden>
+    <div class="card stack">
+      <div class="stepper">
+        <button type="button" id="recapPrev" aria-label="Previous day">‹</button>
+        <div class="d" id="recapDateLabel"></div>
+        <button type="button" id="recapNext" aria-label="Next day">›</button>
+      </div>
+      <div class="recap-rows" id="recapRows"></div>
+    </div>
+    <div class="card stack">
+      <div class="card-head" style="margin:0"><h2>Send to the group chat</h2></div>
+      <pre class="recap-text" id="recapText"></pre>
+      <div class="row"><button type="button" class="btn" id="copyRecap">Copy recap</button><span class="hint">Then paste it into the chat.</span></div>
+    </div>
+  </section>
+</main>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<div class="lightbox" id="lightbox" hidden><img id="lightImg" alt="Meal photo"></div>
+
+<script>
+(function(){
+const TOTAL = 42, GOAL = 30;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ds = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const today = () => ds(new Date());
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const addDays = (s,n) => { const d = parse(s); d.setDate(d.getDate()+n); return ds(d); };
+const diff = (a,b) => Math.round((parse(b)-parse(a))/864e5);
+const fmt = (s,o) => parse(s).toLocaleDateString(undefined, o || {weekday:"short", month:"short", day:"numeric"});
+const validDate = s => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
+const blobSrc = id => (typeof id === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(id)) ? "/_blob/" + id : "";
+const timeOf = t => t ? new Date(t).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}) : "";
+const MEAL_LABEL = {breakfast:"Breakfast", lunch:"Lunch", dinner:"Dinner", snack:"Snack"};
+
+const S = {
+  db:null, user:null, assets:null, me:null, isOwner:false,
+  start:null, players:{}, days:{}, subs:{}, colors:{},
+  status:"loading", tab:"log", logDate:today(), recapDate:today(),
+  mealType:null, workType:"Run", photo:null, saving:false, renaming:false
+};
+
+/* ---------- derived ---------- */
+const startDate = () => S.start || today();
+const endDate = () => addDays(startDate(), TOTAL-1);
+const dayNum = s => diff(startDate(), s) + 1;
+function dayInfo(d){
+  d = d || {};
+  const meals = d.meals || [], w = d.workouts || [];
+  const lunch = meals.some(m => m.type === "lunch"), dinner = meals.some(m => m.type === "dinner");
+  const min = w.reduce((a,x) => a + (Number(x.minutes) || 0), 0);
+  const done = lunch && dinner && min >= GOAL;
+  const any = meals.length + w.length > 0;
+  return {lunch, dinner, min, done, any, meals, w, state: done ? "done" : any ? "partial" : "none"};
+}
+function stats(uid){
+  const days = S.days[uid] || {}, st = startDate(), en = endDate();
+  let complete = 0, mins = 0, workouts = 0;
+  for (const [k,v] of Object.entries(days)){
+    if (k < st || k > en) continue;
+    const i = dayInfo(v);
+    if (i.done) complete++;
+    mins += i.min; workouts += i.w.length;
+  }
+  let streak = 0, cur = today();
+  if (!dayInfo(days[cur]).done) cur = addDays(cur, -1);
+  while (cur >= st && dayInfo(days[cur]).done){ streak++; cur = addDays(cur, -1); }
+  return {complete, mins, workouts, streak};
+}
+const playerIds = () => Object.keys(S.players);
+const nameOf = uid => (S.players[uid] && S.players[uid].name) || "Someone";
+const colorOf = uid => S.colors[uid] || "var(--muted)";
+const joined = () => !!(S.me && S.players[S.me]);
+
+/* ---------- ui helpers ---------- */
+let toastT;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+function errMsg(e){
+  const c = e && e.code;
+  if (c === "invalid_argument" || c === "not_granted") return "This account can't save here yet. Ask the organizer to invite you as an Editor.";
+  if (c === "quota_exceeded" || c === "quota_or_state") return "Storage is full. Ask the organizer to clear old photos.";
+  if (c === "too_large") return "That photo is too big. Try a smaller one.";
+  if (c === "unsupported_type") return "That photo format isn't supported. Try a JPEG or PNG.";
+  if (c === "rate_limited" || c === "resource_exhausted") return "Too many saves at once. Wait a moment and try again.";
+  return "Couldn't save. Check your connection and try again.";
+}
+let queue = Promise.resolve();
+const enqueue = fn => (queue = queue.then(fn).catch(e => { toast(errMsg(e)); }));
+
+/* ---------- render ---------- */
+function renderHeader(){
+  const t = today(), n = dayNum(t);
+  const dl = $("#dayline"), meta = $("#meta");
+  if (!S.start){
+    dl.innerHTML = 'Day — <small>of 42</small>';
+  } else if (n < 1){
+    dl.innerHTML = 'T−' + (1-n) + ' <small>days to go</small>';
+  } else if (n > TOTAL){
+    dl.innerHTML = 'Done <small>42 of 42</small>';
+  } else {
+    dl.innerHTML = 'Day ' + n + ' <small>of 42</small>';
+  }
+  const wk = S.start && n >= 1 && n <= TOTAL ? "Week " + Math.ceil(n/7) : (S.start ? "" : "Start date not set");
+  meta.innerHTML = '<b>' + esc(fmt(t)) + '</b>' + esc(wk);
+  const done = S.start ? Math.max(0, Math.min(TOTAL, n)) : 0;
+  let bar = "";
+  for (let w = 0; w < 6; w++){
+    const f = Math.max(0, Math.min(7, done - w*7));
+    bar += f === 7 ? '<span class="full"></span>' : f > 0 ? '<span class="part" style="--p:' + (f/7*100).toFixed(0) + '%"></span>' : '<span></span>';
+  }
+  $("#bar").innerHTML = bar;
+}
+
+function renderStatus(){
+  const b = $("#statusBanner");
+  if (S.status === "nodb"){
+    b.hidden = false;
+    b.innerHTML = "<b>Sign in to take part</b>Open this link signed in to claude.ai with the email you were invited with. Then you can log meals and workouts and see the squad.";
+  } else if (S.status === "slow"){
+    b.hidden = false;
+    b.innerHTML = "<b>Still connecting…</b>The squad's data hasn't loaded yet. It will appear here as soon as it does.";
+  } else if (S.status === "error"){
+    b.hidden = false;
+    b.innerHTML = "<b>Couldn't load the squad</b>Reload the page to try again.";
+  } else b.hidden = true;
+}
+
+function renderLog(){
+  const canLog = S.status === "ready" && S.me;
+  $("#joinCard").hidden = !(canLog && (!joined() || S.renaming));
+  $("#logArea").hidden = !(canLog && joined());
+  $("#joinCard h2").textContent = S.renaming ? "Change your name" : "Join the challenge";
+  $("#joinCard button[type=submit]").textContent = S.renaming ? "Save name" : "Join";
+  if (!joined()) return;
+
+  const d = S.logDate, isToday = d === today();
+  $("#logDate").value = d; $("#logDate").max = today();
+  const n = dayNum(d);
+  $("#myDayTitle").textContent = (isToday ? "Today" : fmt(d)) + (S.start && n >= 1 && n <= TOTAL ? " · Day " + n : "");
+  const mine = (S.days[S.me] || {})[d];
+  const i = dayInfo(mine);
+  $("#checks").innerHTML =
+    '<div class="check' + (i.lunch ? " ok" : "") + '"><span class="k">Lunch</span><span class="v">' + (i.lunch ? "Done" : "—") + '</span></div>' +
+    '<div class="check' + (i.dinner ? " ok" : "") + '"><span class="k">Dinner</span><span class="v">' + (i.dinner ? "Done" : "—") + '</span></div>' +
+    '<div class="check' + (i.min >= GOAL ? " ok" : "") + '"><span class="k">Workout</span><span class="v num">' + i.min + '<small style="font-size:14px">/30</small></span></div>';
+  $("#dayRule").innerHTML = i.done
+    ? '<span class="daystate done">Full day. That one counts.</span>'
+    : "A day counts when lunch and dinner are logged and you hit 30 minutes of intentional movement.";
+
+  const items = [
+    ...i.meals.map((m,idx) => ({kind:"meals", idx, at:m.at||0, m})),
+    ...i.w.map((w,idx) => ({kind:"workouts", idx, at:w.at||0, w}))
+  ].sort((a,b) => a.at - b.at);
+  $("#myEntries").innerHTML = items.length ? items.map(it => {
+    if (it.kind === "meals"){
+      const src = blobSrc(it.m.photo);
+      return '<li class="entry"><span class="tag meal">' + esc(MEAL_LABEL[it.m.type] || "Meal") + '</span>' +
+        '<div class="txt">' + (esc(it.m.text) || '<span class="hint">Photo only</span>') + '<small>' + esc(timeOf(it.at)) + '</small></div>' +
+        (src ? '<img src="' + src + '" alt="Meal photo" data-zoom="' + src + '" loading="lazy">' : '') +
+        '<button class="x" data-del="meals:' + it.idx + '" aria-label="Delete entry">×</button></li>';
+    }
+    return '<li class="entry"><span class="tag workout">' + esc(it.w.kind || "Workout") + '</span>' +
+      '<div class="txt"><b class="num">' + (Number(it.w.minutes)||0) + ' min</b>' + (it.w.note ? ' · ' + esc(it.w.note) : '') + '<small>' + esc(timeOf(it.at)) + '</small></div>' +
+      '<button class="x" data-del="workouts:' + it.idx + '" aria-label="Delete entry">×</button></li>';
+  }).join("") : '<li class="empty">Nothing logged for this day yet. Start with your last meal or workout.</li>';
+
+  $("#photoRow").hidden = !S.assets;
+}
+
+function grid42(uid){
+  const st = startDate(), t = today(), days = S.days[uid] || {};
+  let h = "";
+  for (let k = 0; k < TOTAL; k++){
+    const d = addDays(st, k);
+    let cls = d > t ? "future" : dayInfo(days[d]).state;
+    if (cls === "none") cls = "";
+    if (d === t) cls += " today";
+    h += '<i class="' + cls + '" title="Day ' + (k+1) + ' · ' + esc(fmt(d)) + '"></i>';
+  }
+  return '<div class="grid42" aria-label="42-day record">' + h + '</div>';
+}
+
+function renderSquad(){
+  const ids = playerIds();
+  $("#ownerCard").hidden = !S.isOwner || S.status !== "ready";
+  if (S.start) $("#startDate").value = S.start;
+  const el = $("#standings");
+  if (!ids.length){
+    $("#squadTotals").innerHTML = "";
+    el.innerHTML = '<div class="empty">No one has joined yet. Share this page in the group chat, then each person opens it and taps Join on the Log tab.</div>';
+    $("#feed").innerHTML = '<li class="empty">Meals and workouts show up here as people log them.</li>';
+    $("#standHint").textContent = "";
+    return;
+  }
+  const t = today();
+  const rows = ids.map(uid => ({uid, s: stats(uid), ti: dayInfo((S.days[uid]||{})[t])}))
+    .sort((a,b) => b.s.complete - a.s.complete || b.s.streak - a.s.streak || b.s.mins - a.s.mins);
+  const elapsed = S.start ? Math.max(0, Math.min(TOTAL, dayNum(t))) : 0;
+  $("#standHint").textContent = S.start ? "Ranked by full days out of " + elapsed + " so far" : "Ranked by full days";
+  const doneToday = rows.filter(r => r.ti.done).length;
+  const totalMin = rows.reduce((a,r) => a + r.s.mins, 0);
+  const totalWorkouts = rows.reduce((a,r) => a + r.s.workouts, 0);
+  $("#squadTotals").innerHTML =
+    '<div class="tot"><div class="v num">' + doneToday + '/' + rows.length + '</div><div class="k">Full today</div></div>' +
+    '<div class="tot"><div class="v num">' + totalMin.toLocaleString() + '</div><div class="k">Squad minutes</div></div>' +
+    '<div class="tot"><div class="v num">' + totalWorkouts + '</div><div class="k">Workouts</div></div>';
+  el.innerHTML = rows.map((r,i) =>
+    '<div class="player">' +
+      '<div class="rank num">' + (i+1) + '</div>' +
+      '<div style="min-width:0">' +
+        '<div class="pname"><i class="dot" style="background:' + esc(colorOf(r.uid)) + '"></i><span>' + esc(nameOf(r.uid)) + (r.uid === S.me ? ' <span class="hint">(you)</span>' : '') + '</span></div>' +
+        '<div class="pstats"><span><b>' + r.s.complete + '</b> full days</span><span><b>' + r.s.streak + '</b> streak</span><span><b>' + r.s.mins.toLocaleString() + '</b> min</span></div>' +
+        '<div class="today-chips">' +
+          '<span class="chip' + (r.ti.lunch ? ' on meal' : '') + '">Lunch</span>' +
+          '<span class="chip' + (r.ti.dinner ? ' on meal' : '') + '">Dinner</span>' +
+          '<span class="chip num' + (r.ti.min >= GOAL ? ' on workout' : '') + '">' + r.ti.min + ' min</span>' +
+          (r.ti.done ? '<span class="chip on done">Full day</span>' : '') +
+        '</div>' +
+      '</div>' +
+      grid42(r.uid) +
+    '</div>').join("");
+
+  // feed
+  const all = [];
+  for (const uid of ids){
+    for (const [d,v] of Object.entries(S.days[uid] || {})){
+      (v.meals || []).forEach(m => all.push({uid, d, at:m.at||0, meal:m}));
+      (v.workouts || []).forEach(w => all.push({uid, d, at:w.at||0, w}));
+    }
+  }
+  all.sort((a,b) => b.at - a.at);
+  $("#feed").innerHTML = all.length ? all.slice(0, 40).map(x => {
+    const when = (x.d === t ? "Today" : fmt(x.d)) + (x.at ? " · " + timeOf(x.at) : "");
+    const who = '<span class="who">' + esc(nameOf(x.uid)) + '</span>';
+    if (x.meal){
+      const src = blobSrc(x.meal.photo);
+      return '<li><i class="dot" style="background:' + esc(colorOf(x.uid)) + ';margin-top:6px"></i><div class="body">' + who +
+        ' <span class="tag meal" style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:2px 6px">' + esc(MEAL_LABEL[x.meal.type] || "Meal") + '</span>' +
+        '<div>' + (esc(x.meal.text) || '<span class="hint">Sent a photo</span>') + '</div><div class="when">' + esc(when) + '</div></div>' +
+        (src ? '<img src="' + src + '" alt="Meal photo from ' + esc(nameOf(x.uid)) + '" data-zoom="' + src + '" loading="lazy">' : '') + '</li>';
+    }
+    return '<li><i class="dot" style="background:' + esc(colorOf(x.uid)) + ';margin-top:6px"></i><div class="body">' + who +
+      ' <span class="tag workout" style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:2px 6px">' + esc(x.w.kind || "Workout") + '</span>' +
+      '<div><b class="num">' + (Number(x.w.minutes)||0) + ' min</b>' + (x.w.note ? ' · ' + esc(x.w.note) : '') + '</div><div class="when">' + esc(when) + '</div></div></li>';
+  }).join("") : '<li class="empty">Meals and workouts show up here as people log them.</li>';
+}
+
+function recapFor(d){
+  const ids = playerIds();
+  return ids.map(uid => ({uid, i: dayInfo((S.days[uid]||{})[d]), s: stats(uid)}))
+    .sort((a,b) => (b.i.done - a.i.done) || (b.i.min - a.i.min));
+}
+function mealLine(i, type){
+  const ms = i.meals.filter(m => m.type === type);
+  if (!ms.length) return "";
+  return ms.map(m => m.text || "photo").join(", ");
+}
+function renderRecap(){
+  const d = S.recapDate, n = dayNum(d);
+  $("#recapDateLabel").textContent = (d === today() ? "Today, " : "") + fmt(d) + (S.start && n >= 1 && n <= TOTAL ? " · Day " + n : "");
+  $("#recapNext").disabled = d >= today();
+  const rows = recapFor(d);
+  if (!rows.length){
+    $("#recapRows").innerHTML = '<div class="empty">The recap fills in once people join and start logging.</div>';
+    $("#recapText").textContent = "";
+    return;
+  }
+  $("#recapRows").innerHTML = rows.map(r => {
+    const L = mealLine(r.i, "lunch"), D = mealLine(r.i, "dinner");
+    const W = r.i.w.map(w => (w.kind || "Workout") + " " + (Number(w.minutes)||0) + " min" + (w.note ? " (" + w.note + ")" : "")).join(", ");
+    const badge = r.i.done ? "Full" : r.i.any ? "Partial" : "Quiet";
+    return '<div class="rrow"><span class="badge ' + r.i.state + '">' + badge + '</span><div class="lines">' +
+      '<div class="pname" style="font-size:15px"><i class="dot" style="background:' + esc(colorOf(r.uid)) + '"></i><span>' + esc(nameOf(r.uid)) + '</span></div>' +
+      '<div>Lunch: <b>' + (L ? esc(L) : "—") + '</b></div>' +
+      '<div>Dinner: <b>' + (D ? esc(D) : "—") + '</b></div>' +
+      '<div>Movement: <b>' + (W ? esc(W) : "—") + '</b>' + (r.i.min ? ' · <b class="num">' + r.i.min + '/30</b>' : '') + '</div>' +
+      '</div></div>';
+  }).join("");
+
+  const full = rows.filter(r => r.i.done).length;
+  const mins = rows.reduce((a,r) => a + r.i.min, 0);
+  let txt = "BOOTCAMP RECAP · " + fmt(d) + (S.start && n >= 1 && n <= TOTAL ? " · Day " + n + "/42" : "") + "\n";
+  txt += full + "/" + rows.length + " full days · " + mins + " squad minutes\n\n";
+  for (const r of rows){
+    const mark = r.i.done ? "✅" : r.i.any ? "🟡" : "⬜";
+    const parts = [];
+    parts.push("L: " + (mealLine(r.i,"lunch") || "—"));
+    parts.push("D: " + (mealLine(r.i,"dinner") || "—"));
+    parts.push(r.i.w.length ? r.i.w.map(w => (w.kind||"Workout") + " " + (Number(w.minutes)||0) + "m").join(" + ") : "no workout");
+    txt += mark + " " + nameOf(r.uid) + (r.s.streak > 1 ? " (🔥" + r.s.streak + ")" : "") + "\n   " + parts.join(" · ") + "\n";
+  }
+  const missing = rows.filter(r => !r.i.done).map(r => nameOf(r.uid));
+  if (d === today() && missing.length) txt += "\nStill time today: " + missing.join(", ");
+  $("#recapText").textContent = txt.trim();
+}
+
+function renderTabs(){
+  document.querySelectorAll("nav a").forEach(a => a.setAttribute("aria-current", a.dataset.tab === S.tab ? "page" : "false"));
+  document.querySelectorAll("section[data-view]").forEach(s => s.hidden = s.dataset.view !== S.tab);
+}
+
+let colorReq = 0;
+async function resolveColors(){
+  const ids = playerIds().filter(id => !S.colors[id]);
+  if (!S.user || !ids.length) return;
+  const mine = ++colorReq;
+  try {
+    const ps = await S.user.profiles(ids);
+    if (mine !== colorReq) return;
+    let changed = false;
+    for (const id of ids){ if (ps[id] && ps[id].color){ S.colors[id] = ps[id].color; changed = true; } }
+    if (changed) render(true);
+  } catch {}
+}
+
+function render(skipColors){
+  renderHeader(); renderStatus(); renderTabs(); renderLog(); renderSquad(); renderRecap();
+  if (!skipColors) resolveColors();
+}
+
+/* ---------- data ---------- */
+function subDays(uid){
+  if (S.subs[uid]) return;
+  S.subs[uid] = S.db.collection("players/" + uid + "/days").onSnapshot(snap => {
+    const m = {};
+    snap.docs.forEach(doc => { m[doc.id] = doc.data(); });
+    S.days[uid] = m;
+    render();
+  }, () => {});
+}
+
+async function boot(){
+  render();
+  const c = window.claude;
+  if (!c || typeof c.use !== "function"){ S.status = "nodb"; render(); return; }
+  const [db, user, assets] = await Promise.all([c.use("db"), c.use("user"), c.use("assets")]);
+  S.db = db; S.user = user; S.assets = assets;
+  if (!db){ S.status = "nodb"; render(); return; }
+  try { S.me = user ? await user.id() : null; S.isOwner = user ? await user.isOwner() : false; } catch {}
+  if (!S.me) S.status = "nodb";
+
+  const slow = setTimeout(() => { if (S.status === "loading"){ S.status = "slow"; render(); } }, 10000);
+  db.doc("config/challenge").onSnapshot(s => {
+    const v = s.exists ? s.data().startDate : null;
+    S.start = validDate(v) ? v : null;
+    render();
+  }, () => {});
+  db.collection("players").onSnapshot(snap => {
+    if (!snap.metadata.fromCache) clearTimeout(slow);
+    if (S.status === "loading" || S.status === "slow") S.status = S.me ? "ready" : "nodb";
+    const seen = new Set();
+    snap.docs.forEach(doc => { seen.add(doc.id); S.players[doc.id] = doc.data(); subDays(doc.id); });
+    for (const id of Object.keys(S.players)) if (!seen.has(id)){
+      delete S.players[id]; delete S.days[id];
+      if (S.subs[id]){ S.subs[id](); delete S.subs[id]; }
+    }
+    render();
+  }, () => { clearTimeout(slow); S.status = "error"; render(); });
+}
+
+function myDayRef(d){ return S.db.doc("players/" + S.me + "/days/" + d); }
+function mutateDay(d, fn){
+  return enqueue(async () => {
+    const cur = (S.days[S.me] || {})[d];
+    const next = cur ? JSON.parse(JSON.stringify(cur)) : {};
+    next.date = d; next.meals = next.meals || []; next.workouts = next.workouts || [];
+    fn(next);
+    next.updatedAt = Date.now();
+    await myDayRef(d).set(next);
+  });
+}
+
+async function shrink(file){
+  try {
+    const bmp = await createImageBitmap(file);
+    const sc = Math.min(1, 1280 / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(bmp.width*sc); cv.height = Math.round(bmp.height*sc);
+    cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+    const b = await new Promise(r => cv.toBlob(r, "image/jpeg", 0.82));
+    return b || file;
+  } catch { return file; }
+}
+
+/* ---------- events ---------- */
+function setSeg(group, v){ group.querySelectorAll("button[data-v]").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === v ? "true" : "false")); }
+function defaultMeal(){ const h = new Date().getHours(); return h < 10 ? "breakfast" : h < 16 ? "lunch" : "dinner"; }
+
+$("#mealType").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (!b) return; S.mealType = b.dataset.v; setSeg($("#mealType"), S.mealType); });
+$("#workType").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (!b) return; S.workType = b.dataset.v; setSeg($("#workType"), S.workType); });
+document.querySelectorAll("[data-min]").forEach(b => b.addEventListener("click", () => { $("#workMin").value = b.dataset.min; }));
+
+$("#mealPhoto").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  S.photo = f;
+  $("#photoThumb").src = URL.createObjectURL(f);
+  $("#photoPreview").hidden = false;
+});
+$("#photoClear").addEventListener("click", () => { S.photo = null; $("#mealPhoto").value = ""; $("#photoPreview").hidden = true; });
+
+$("#mealSave").addEventListener("click", async () => {
+  const text = $("#mealText").value.trim();
+  if (!text && !S.photo){ toast("Add what you ate or a photo."); return; }
+  const btn = $("#mealSave"); btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    let photo = null;
+    if (S.photo && S.assets){
+      const blob = await shrink(S.photo);
+      const res = await S.assets.upload(blob, blob.type ? undefined : {type:"image/jpeg"});
+      photo = res.id;
+    }
+    const type = S.mealType || defaultMeal();
+    await mutateDay(S.logDate, d => d.meals.push({type, text, photo, at: Date.now()}));
+    $("#mealText").value = ""; S.photo = null; $("#mealPhoto").value = ""; $("#photoPreview").hidden = true;
+    toast(MEAL_LABEL[type] + " logged");
+  } catch (e) { toast(errMsg(e)); }
+  btn.disabled = false; btn.textContent = "Save meal";
+});
+
+$("#workSave").addEventListener("click", async () => {
+  const minutes = Math.round(Number($("#workMin").value));
+  if (!(minutes > 0 && minutes <= 600)){ toast("Enter how many minutes you worked out."); return; }
+  const note = $("#workNote").value.trim();
+  const kind = S.workType;
+  const btn = $("#workSave"); btn.disabled = true; btn.textContent = "Saving…";
+  await mutateDay(S.logDate, d => d.workouts.push({kind, minutes, note, at: Date.now()}));
+  $("#workNote").value = "";
+  btn.disabled = false; btn.textContent = "Save workout";
+  toast(kind + " · " + minutes + " min logged");
+});
+
+$("#myEntries").addEventListener("click", e => {
+  const del = e.target.closest("[data-del]");
+  if (del){
+    const [kind, idx] = del.dataset.del.split(":");
+    const i = Number(idx);
+    const cur = ((S.days[S.me] || {})[S.logDate] || {})[kind] || [];
+    const photo = kind === "meals" && cur[i] ? cur[i].photo : null;
+    mutateDay(S.logDate, d => { d[kind].splice(i, 1); }).then(() => {
+      if (photo && S.assets) S.assets.delete(photo).catch(() => {});
+    });
+    return;
+  }
+});
+document.addEventListener("click", e => {
+  const z = e.target.closest("[data-zoom]");
+  if (z){ $("#lightImg").src = z.dataset.zoom; $("#lightbox").hidden = false; }
+});
+$("#lightbox").addEventListener("click", () => { $("#lightbox").hidden = true; });
+
+$("#logDate").addEventListener("change", e => { if (validDate(e.target.value) && e.target.value <= today()){ S.logDate = e.target.value; render(true); } });
+
+$("#joinForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("#joinName").value.trim().slice(0, 24);
+  if (!name) return;
+  const wasRenaming = S.renaming;
+  enqueue(async () => {
+    const ref = S.db.doc("players/" + S.me);
+    const cur = S.players[S.me];
+    await ref.set({name, joinedAt: (cur && cur.joinedAt) || Date.now()});
+    S.renaming = false;
+    toast(wasRenaming ? "Name updated" : "You're in. Log your first meal or workout.");
+    render();
+  });
+});
+$("#renameBtn").addEventListener("click", () => {
+  S.renaming = true; $("#joinName").value = nameOf(S.me); render(true);
+  $("#joinCard").scrollIntoView({behavior:"smooth", block:"start"}); $("#joinName").focus();
+});
+
+$("#startSave").addEventListener("click", () => {
+  const v = $("#startDate").value;
+  if (!validDate(v)){ toast("Pick a start date."); return; }
+  enqueue(async () => { await S.db.doc("config/challenge").set({startDate: v}); toast("Day 1 set to " + fmt(v)); });
+});
+
+$("#recapPrev").addEventListener("click", () => { S.recapDate = addDays(S.recapDate, -1); renderRecap(); });
+$("#recapNext").addEventListener("click", () => { if (S.recapDate < today()){ S.recapDate = addDays(S.recapDate, 1); renderRecap(); } });
+$("#copyRecap").addEventListener("click", () => {
+  const txt = $("#recapText").textContent;
+  if (!txt){ toast("Nothing to copy yet."); return; }
+  const fallback = () => { const r = document.createRange(); r.selectNodeContents($("#recapText")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected. Copy it from the menu."); };
+  try { navigator.clipboard.writeText(txt).then(() => toast("Copied. Paste it in the group chat."), fallback); } catch { fallback(); }
+});
+
+function route(){
+  const h = location.hash.replace("#", "");
+  S.tab = ["log","squad","recap"].includes(h) ? h : "log";
+  render(true);
+}
+window.addEventListener("hashchange", route);
+
+// Roll the date over at midnight while the page stays open.
+let lastDay = today();
+setInterval(() => { const t = today(); if (t !== lastDay){ if (S.logDate === lastDay) S.logDate = t; if (S.recapDate === lastDay) S.recapDate = t; lastDay = t; render(true); } }, 60000);
+
+S.mealType = defaultMeal(); setSeg($("#mealType"), S.mealType); setSeg($("#workType"), S.workType);
+const h0 = location.hash.replace("#", ""); S.tab = ["log","squad","recap"].includes(h0) ? h0 : "log";
+boot();
+})();
+</script>
